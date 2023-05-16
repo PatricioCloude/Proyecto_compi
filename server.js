@@ -6,7 +6,7 @@ app.use(morgan('dev'))
 /* Agregando el midleware */
     app.use(express.json()) 
 /* -----------------------*/
-const products = [
+let products = [
     {
         id: 1,
         name: "eduardo",
@@ -23,23 +23,48 @@ app.post('/productos',(req,res) =>{
     products.push(new_products)  // agregar los datos
     res.send(new_products) 
 })
-app.put('/productos',(req,res) =>{
-    res.send('Actualizando productos')
+
+app.put('/productos/:id',(req,res) =>{
+
+    const newdata = req.body
+    const productFoud = products.find(
+        (product) => product.id === parseInt(req.params.id)
+    )
+
+    if(!productFoud) return res.status(404).json({
+        mensaje: "Producto no encontrado"
+    })
+
+    products = products.map( p => p.id === parseInt(req.params.id) ? {...p, ...newdata} : p) 
+
+    res.json({
+        mensaje : "Producto actualizado "
+    })
 })
-app.delete('/productos',(req,res) =>{
-    res.send('Eliminando productos')
+
+app.delete("/productos/:id",(req,res) =>{
+    const productFoud = products.find(
+        (product) => product.id === parseInt(req.params.id)
+    )
+
+    if(!productFoud) return res.status(404).json({
+        mensaje: "Producto no encontrado"
+    })
+    products = products.filter( (p) => p.id !== parseInt(req.params.id) )
+    res.sendStatus(204)
 })
+
 app.get('/productos/:id',(req,res) =>{
     console.log(req.params.id)
 
     const productFoud = products.find(
         (product)  => product.id === parseInt(req.params.id)
     )
-/*
-    const productFoud = products.find(function(product){ // por cada elemento de la funcion se compara con el elemento
-        return product.id ===  parseInt(req.params.id) // parseInte (convirtiendo string a entero)
-    })
-*/
+    /*
+        const productFoud = products.find(function(product){ // por cada elemento de la funcion se compara con el elemento
+            return product.id ===  parseInt(req.params.id) // parseInte (convirtiendo string a entero)
+        })
+    */
     if(!productFoud) return res.status(404).json({
         mensaje: "Producto no existe"
     })
